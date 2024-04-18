@@ -402,5 +402,137 @@
         }
         
     </div>
+  <style>
+
+.search-container{
+    margin-bottom: 20px;
+    text-align : center;
+}
+
+#searchInput {
+    padding: 10px;
+    width: 50%;
+    border: 2px solid #ddd;
+    font-size: 16px;
+    border-radius: 4px; 
+    margin-bottom: 20px;
+}
+
+.table-row -display { display: none};
+.table-row-display td{display: table-cell;}
+</style>
+
+<script>
+    function searchProject (){
+        var input, filter, table, tr, td,  i;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.querySelector(".project-list");
+        tr = table.getEelementsByTagNmae("tr");
+
+    for(i=0; i< tr.length; i++) {
+        td= tr[i].getElementsByTagName("td");
+        if(td.lenghth>1) {
+            var fullName = td[0].textContent || td[0].innerText;
+            var shortNmae = td[1].textContent || td[1].innerText;
+            if(fullName.toUpperCase().indexOf(filetr)>-1 || shortName.toUpperCase().indexOf(filter)>-1){
+                tr[i].style.display="";
+            } else{
+                tr[i].style.display="none";
+            }
+        }
+    } 
+    }
+    </script>
+
+    <div class="lg-12">
+<br>
+    <div class="search-container">
+    <input type="text" id="searchInput" onkeyup="searchProjects()" placeholder="Serach for projects...">
+
+</div>
+    <table class="project-list">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Short Name</th>
+                <th> Tasks left</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <?php
+        $currentUser =$connection->real_escape_string($_SESSION['user']);
+        $sql ="SELECT * FROM projects WHERE 'user = '$currentUser'";
+
+        if($result = $connection->query($sql)){
+            $projectsCount = $result ->num_rows;
+            if($projectsCount >0){
+                while ($row = mysqli_fetch_array($result)){
+                    $sn = $row['short name'];
+                    $sumSQL  = "SELECT count (*) as tasksLeft FROM 'tasks' WHERE project_short_name = '$sn' AND state !=4";
+                    $sumResult = $connection->query($sumSQL);
+                    $row2 = $sumResult ->fetch_assoc();
+
+                    echo " 
+                        <tr> 
+                        <td>".htmlspecialchars($row['Full name'])."</td>
+                        <td>".htmlspecialchars($row['Short name'])."</td>
+                        <td>".htmlspecialchars($row2['tasksLeft'])."</td>
+                        <td>
+                        <a href='board.php?sn=".urlencode($row['Short name'])."' class='btn btn-board'>Board</a>
+                        <a href='updateProject.php?sn=".urlencode($row['Short name'])."' class='btn btn-update'>Update</a>
+                        <a href='javascript:void(0);' onclick='confirmDelete(\"".urlencode($row['Short name'])."\")' class='btn btn-delete'>Delete</a>
+                    </td>
+                </tr> 
+                    ";
+                }
+                $result ->free_result();
+            }else{
+                echo "tr><td colspan='4'> No projects for the current user. </td> </tr>";
+            }
+        }
+        ?>
+        </tbody>
+    </table>
+    </div>
+    </div>
+
+    <div id ="changePsswordModal" class="modal">
+        <div class= "modal-content">
+            <span class ="close" onclick="closeModal()">&times; </span>
+            <h2>Change Password</h2>
+            <form id= "changePasswordForm" method="post" action="">
+                <lable for ="newPassword"> New Password </label>
+                <input tupe = "password" id ="newPassword" name ="newPassword"required> <br> <br>
+                <label for="confirmPassword"> Confirm Password </label>
+                <input type = "password" id="confirmPassword" name = "confirmPassword" required ><br><br>
+                <input type = "submit" value="Change Password">
+            </form>
+        
+        </div>
+    </div>
+
+    <script>
+    function openModal(){
+        var modal = document .getElementById("changePasswordModal");
+        modal.style.display ="block";
+    }
+
+    function closeModal (){
+        var modal = document.getElementById ("changePasswordModal");
+        modal.style.display ="none";
+    }
+
+    function confirmDelete(shortName ){
+        var confrimAction = confirm("Are you sure you wnat to delete this project? This action cannot be undone");
+        if(confirmAction){
+            window.location.href = "delete[roject.php?sn =" + shortName;
+        }else{
+
+        }
+    }
+    </script>
+    <?php include 'footer.php'; ?>
+
 
 
